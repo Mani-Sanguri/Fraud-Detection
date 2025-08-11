@@ -1,0 +1,190 @@
+Data Structure & Initial Checks
+Main database structure as seen below consists of columns:'merchant', 'category', 'amt', 'gender', 'street', 'city', 'state', 'job', 'trans_num', 'is_fraud', 'date', 'time', 'name' with a total row count of X records. A description of each column is as follows:
+     Column     Non-Null Count    Dtype  
+---  ------     --------------    -----  
+ 0   merchant   1296675 non-null  object 
+ 1   category   1296675 non-null  object 
+ 2   amt        1296675 non-null  float64
+ 3   gender     1296675 non-null  object 
+ 4   street     1296675 non-null  object 
+ 5   city       1296675 non-null  object 
+ 6   state      1296675 non-null  object 
+ 7   job        1296675 non-null  object 
+ 8   trans_num  1296675 non-null  object 
+ 9   is_fraud   1296675 non-null  bool   
+ 10  date       1296675 non-null  object 
+ 11  time       1296675 non-null  object 
+ 12  name       1296675 non-null  object
+
+A regular model (like logistic regression or Random Forest) will likely predict everything as "non-fraud" to get 99% accuracy — but that’s useless because it misses the frauds. You must handle class imbalance, or your model won’t learn meaningful fraud patterns. SMOTE will be required
+
+I. Number of frauds vs day of week
+  Insights:
+  1. Highest Fraud Activity
+      A. Saturday and Sunday show the highest number of fraudulent transactions suggesting a strong weekend fraud spike.
+      B. These days may require tighter fraud detection protocols and enhanced transaction scrutiny.
+  2. Lowest Fraud Activity
+      A. Tuesday and Wednesday show the lowest fraud volumes, potentially indicating mid-week slowdown.
+II. Number of frauds vs month
+  Insights:
+  1. Highest Fraud Activity
+      A. March and May show the highest number of fraudulent transactions.
+      B. These months may require tighter fraud detection protocols and enhanced transaction scrutiny.
+  2. Consistently High Fraud
+      A. January, February, and April also report elevated fraud counts, suggesting a strong Q1–Q2 fraud spike.
+  3. Lowest Fraud Activity
+      A. July and August show the lowest fraud volumes, potentially indicating seasonal slowdown or stronger fraud prevention systems in place during this period.
+  4. Moderate Fraud Levels
+      A. October, September, and December show mid-level fraud patterns — possibly tied to holiday shopping spikes or end-of-quarter transactions.
+III. Number of frauds vs hours
+  Insights: 
+  1. Fraud Peaks at Night:
+      A. Fraudulent transactions spike sharply between 22:00 and 23:59 hours (10 PM – midnight).
+      B. These two hours alone account for over 40% of all fraud cases.
+      C. Night-time is high-risk. Fraudsters may exploit low system monitoring or human oversight during off-hours.
+  2. Early Morning Activity (00:00–03:00):
+      A. A secondary rise is observed just after midnight, suggesting activity continues into early hours.
+  3. Fraud Drops During Daytime:
+      A. Between 05:00 and 20:00, fraud levels remain very low and steady.
+      B. Legitimate transactions dominate during working hours.
+IV. Number of frauds vs amount in fraudulent activities:
+  Insights:
+  1. Fraud is more likely at low-to-mid amounts:
+      A. Most fraudulent transactions occur in the ₹1 to ₹100 range
+      B. Fraudsters may prefer smaller transactions to:
+          a. Avoid triggering alerts
+          b. Test stolen cards or credentials (a known fraud tactic)
+  2. Very few frauds occur at high amounts
+      A. Almost no orange bars beyond ₹1,000+. Possibly because:
+          a. High-value transactions are rare
+          b. They're already well-monitored by fraud prevention systems
+  3. There are distinct peaks in transaction volume (non-fraud)
+      A. Sharp peaks at certain values like ₹10, ₹100 — possibly standard retail pricing patterns
+  
+  Note: Fraudulent transactions are heavily concentrated in low to mid-range transaction amounts (₹1–₹100). High-value frauds are rare, possibly due to existing   monitoring. This insight suggests smaller transactions shouldn’t be overlooked — they may carry a higher risk per transaction.
+V. Number of fraud vs category and Amount vs category
+Findings:
+  1. Fraud Frequency (Left Chart - is_fraud vs category):
+      A. grocery_pos and shopping_net categories record the highest number of fraud cases.
+      B. Moderate fraud counts are also observed in misc_net, shopping_pos, and gas_transport.
+      C. Categories like travel, grocery_net, and health_fitness show relatively low fraud activity.
+  2. Fraud Amount (Right Chart - amt vs category):
+      A. The largest monetary fraud losses come from the shopping_net category.
+  3. Significant fraud amounts also occur in:
+      A. shopping_pos
+      B. misc_net
+      C. grocery_pos
+  4. Categories with low fraud frequency (like travel) contribute almost negligible monetary loss.
+  Insights: 
+  1. Online categories like shopping_net and misc_net are disproportionately targeted, indicating higher digital fraud risk.
+  2. Even POS-based categories (grocery_pos, shopping_pos) are not immune — possibly due to card-present fraud schemes.
+  3. Categories such as home, health_fitness, and travel are low-risk, both in frequency and financial impact.
+  Recommendations:
+  1. Prioritize fraud detection and prevention for high-risk categories (shopping_net, grocery_pos, misc_net).
+  2. Strengthen digital transaction authentication and real-time risk scoring on e-commerce channels.
+VI. Number of fraud vs gender and Amount vs gender
+  Insights:
+  1. Fraud Count by Gender (is_fraud vs gender)
+      A. Male and Female customers exhibit nearly equal fraud counts, with a very slight edge for males.
+      B. This indicates no significant gender bias in the number of fraudulent transactions detected.
+  2. Fraud Amount by Gender (amt vs gender)
+      A. Although fraud counts are similar, the total fraud amount is higher for males.
+      B. This suggests that when fraud does occur:
+          a. Male customers may be targeted for higher-value transactions, or fraudulent transactions linked to males involve larger monetary amounts.
+VII. Fraud Volume by State, Total Fraud Amount by State, Total Transaction Count by State 
+  Insights:
+  1. Fraud Volume by State:
+      A. TX, NY, CA, and FL show the highest number of fraud cases.
+      B. States like WY, VT, ND, and DC show very low fraud counts.
+      C. These patterns align with high-population or high-transaction-volume states.
+  2. Total Fraud Amount by State (Middle Plot):
+      A. CA, TX, and NY also dominate in terms of total fraud amount, with each crossing several million dollars.
+      B. This indicates both high frequency and high-value fraud activity in these states.
+  3. Total Transaction Count by State (Right Plot):
+      A. Again, CA, TX, NY have the highest number of total transactions, making them high-risk but also high-volume zones.
+      B. The fraud numbers correlate strongly with transaction volume, but not perfectly — suggesting other factors (like fraud rate, not just volume) are at play.
+  Recommendations: 
+  1. Deploy region-specific fraud detection models in high-risk states like TX, NY, and CA.
+  2. Investigate why some lower-volume states (e.g., CO, GA) still report relatively high fraud counts — could indicate emerging threats or weaker local controls.
+VIII. Top Offenders:
+    A. Scott Martin tops the list with 27 fraud instances, followed closely by Jennifer Scott (26) and Robert James (22).
+    B. Several others, including Susan Garcia and Linda Davis, appear multiple times with 20+ frauds — indicating persistent patterns or vulnerabilities.
+IX. Key Red Flags
+1. Extremely High Frequency of Transactions
+    A. Over 480+ unique dates in 18 months = fraud almost daily.
+    B. Highly improbable for regular customers.
+2. Hundreds of Unique Merchants per Name
+    A. Scott Martin used 686 different merchants. Suggests either:
+        a. Identity is being reused across different merchant accounts.
+        b. Fake merchant IDs.
+3. Large and Suspicious Amounts
+    A. Max transactions touch ₹8,000–₹8,800+ range. These are near high-value transaction limits, hinting abuse of card/payment thresholds.
+4. All Use Same 14 Categories
+    A. Uniformity in category count hints these are scripted or system-generated frauds, not organic usage.
+5. Identical Time Span (Jan 2019 – Jun 2020)
+    A. These three names operated in perfect sync.
+    B. Possible link: Same fraud ring or backend access.
+X. Insights from the Chart: Merchant Risk Distribution (with High-Risk Included)
+  1. Low-Risk Merchants Dominate:
+      A. Over 450 merchants fall under the Low-Risk category — more than 70% of the total.
+      B. This indicates that most merchants operate within acceptable and compliant risk thresholds.
+  2. Medium-Risk Merchants Are Moderate:
+      A. Around 150 merchants are classified as Medium-Risk.
+      B. These merchants may need additional monitoring or engagement to ensure risk does not escalate.
+  3. High-Risk Segment Exists but Is Small:
+      A. Only ~80 merchants are tagged as High-Risk, forming the smallest portion of the base.
+      B. While this is a good sign, it’s critical to prioritize monitoring and controls for this group.
+  4. Healthy Risk Profile Overall:
+      A. The distribution reflects a generally well-managed merchant ecosystem with limited exposure to high-risk operations.
+  Recommendations:
+  The merchant portfolio demonstrates a predominantly low-risk profile, with over 70% of merchants categorized as low-risk. Medium- and high-risk merchants collectively form less than 30% of the base, indicating effective risk control mechanisms in place. However, the presence of high-risk merchants, though limited, necessitates targeted interventions and continuous monitoring to prevent potential financial or reputational threats.
+XI. Transactions per day for fraudulent and non-fraudulent activities:
+  Insights:
+  1. Median Transaction Velocity is Higher in Fraud Cases:
+      A. Fraudulent merchants (True) have a higher median number of transactions per day (≈6) compared to non-fraudulent merchants (≈4).
+      B. This suggests fraudulent users are more active on average.
+  2. Outlier Patterns Differ:
+      A. Non-fraudulent merchants have more extreme outliers, with some exceeding 30+ transactions/day.
+      B. Fraudulent merchants have fewer outliers but still reach up to ~18 transactions/day.
+  3. Overlap Still Exists:
+      A. Both fraud and non-fraud groups share a common range (~1 to 13 txns/day), meaning velocity alone isn't conclusive.
+XII. Amount in transactions for fraudulent and non-fraudulent activities:
+  Insights:
+  1. The fraudulent transactions are mostly limited to amount less than 5000.
+  2. Outliers exists in non-fraudulent transactions with transaction amounts reaching to aprroximately 30,000.
+  3. Fraudulent transactions are mostly limited to small amounts.
+  Analysis revealed that, while honest customers transact in a wide range of amounts—including high-value outliers—fraudulent transactions are both lower and less variable in amount. This suggests fraudsters tend to make modest transactions, likely to avoid detection, emphasizing the importance of scrutinizing small and medium-sized amounts in fraud detection systems.
+
+Modelling: 
+Insights:
+  1. The Good:
+      A. Model is catching 75% of frauds (recall) → Excellent for first model
+      B. ROC-AUC > 0.90 means strong classifier
+      C. Handled class imbalance correctly using SMOTE
+  2. The Problem:
+      A. Precision for fraud is just 0.05 → means:
+          a. Out of 100 fraud predictions, only 5 are actually fraud
+          b. → 95 false alarms = business noise
+
+Top Fraud-Driving Features (from model coefficients)
+Rank	Feature	            Coefficient	Interpretation
+️1.	    amt	                4.45	High transaction amounts are strongly associated with fraud
+️2. 	category_gas_transport	1.56	Fraud likely in fuel/transport purchases
+3.	category_grocery_pos	  1.43	POS (physical) grocery payments are fraud-sensitive
+️4.	category_personal_care	0.87	Unexpected frauds in personal care purchases
+️5.	category_kids_pets	    0.82	Pet/Kid-related expenses tied to risky behavior
+️6.	category_misc_pos	      0.80	Misc POS spending can be suspicious
+️7.	category_food_dining	  0.67	Dining transactions have moderate fraud patterns
+️8.	category_health_fitness	0.66	Fraud seen in fitness/health purchases
+️9.	category_grocery_net	  0.64	Online grocery purchases flagged as risky
+10.	category_travel	        0.63	Travel-related fraud is non-negligible
+
+Interpretation from confusion matrix:
+1. Your model catches 3 out of 4 frauds (recall 75%)
+2. But for every 1 real fraud flagged, it also flags ~19 legit ones (precision ~5%)
+3. High false positives may cause customer dissatisfaction and review overload
+Recommendations from it:
+1. This model is great for internal fraud alerting — it catches frauds well.
+2. But it needs manual review or threshold tuning to reduce unnecessary escalations.
+3. In a banking environment, this model could power tier-1 alerts, then hand off to a human or stricter model.
+
